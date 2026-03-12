@@ -131,8 +131,12 @@ emission ($\alpha=0.55$).}
 \label{fig:msp_fractals}
 \end{figure}
 
-\textbf{Sequence generation.} Each sequence of length 16 is generated entirely
-from one component $k \sim \mathrm{Uniform}(3)$.
+\textbf{Sequence generation.} Each sequence has length equal to the context
+window (16 tokens), generated entirely from one component
+$k \sim \mathrm{Uniform}(3)$.
+The context window was set to 16 to satisfy $N^* < L$: with $N^* \approx 9.6$,
+the model has enough context to synchronise to the correct component within a
+single sequence.
 The corpus is non-ergodic because sequences never switch between components.
 
 \textbf{Ground-truth belief states.} For every token position in every sequence,
