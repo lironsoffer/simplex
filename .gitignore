@@ -17,6 +17,12 @@ data/*.npy
 # Jupyter checkpoints
 .ipynb_checkpoints/
 
+# LaTeX auxiliaries
+writeup/*.aux
+writeup/*.log
+writeup/*.out
+writeup/*.toc
+
 # macOS
 .DS_Store
 
