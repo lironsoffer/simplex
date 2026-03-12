@@ -13,7 +13,6 @@ Phases:
 
 import argparse
 import json
-import os
 import sys
 from pathlib import Path
 
@@ -29,23 +28,18 @@ sys.path.insert(0, str(project_root))
 
 from src.data.mess3 import (
     build_default_components,
-    compute_synchronisation_horizon,
     COMPONENT_PARAMS,
 )
-from src.data.belief_update import initial_belief
-from src.data.dataset import generate_sequences, build_dataloaders, Mess3Dataset
+from src.data.dataset import generate_sequences, Mess3Dataset
 from src.model.transformer import build_model, get_residual_stream
 from src.training.train import train, load_checkpoint
 from src.analysis.regression import (
     extract_residual_stream_all_layers,
     fit_belief_regression,
     fit_belief_regression_oos,
-    fit_component_subspace,
-    r2_by_layer_and_position,
     project_out_subspace,
 )
 from src.analysis.pca import (
-    compute_pca,
     pca_by_layer,
     plot_fractal,
     plot_joint_9state_attractor,
@@ -198,7 +192,6 @@ def phase_train(device: str):
     val_eta = np.load(data_path / "val_eta.npy")
     val_ids = np.load(data_path / "val_ids.npy")
 
-    from src.data.dataset import Mess3Dataset
     from torch.utils.data import DataLoader
 
     val_dataset = Mess3Dataset(

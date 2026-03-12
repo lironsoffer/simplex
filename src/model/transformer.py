@@ -9,7 +9,6 @@ TransformerLens is used to provide built-in hooks for residual stream access.
 """
 
 import torch
-import transformer_lens
 from transformer_lens import HookedTransformer, HookedTransformerConfig
 
 

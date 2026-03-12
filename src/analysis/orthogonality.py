@@ -12,7 +12,6 @@ import numpy as np
 from dataclasses import dataclass
 
 from src.analysis.regression import (
-    RegressionResult,
     fit_belief_regression,
     project_out_subspace,
 )

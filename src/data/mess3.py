@@ -118,20 +118,6 @@ class Mess3HMM:
         """Stationary distribution over hidden states, shape (3,)."""
         return self._stationary.copy()
 
-    def token_probability(self, eta: np.ndarray, token: int) -> float:
-        """
-        Compute marginal probability of emitting token given belief state eta.
-
-        Args:
-            eta: belief state, shape (3,), sums to 1
-            token: token index in {0, 1, 2}
-
-        Returns:
-            P(token | eta) = eta @ T^(token) @ ones
-        """
-        T_a = self._transition_matrices[token]
-        return float(eta @ T_a @ np.ones(self.N_STATES))
-
     def update_belief(self, eta: np.ndarray, token: int) -> np.ndarray:
         """
         Bayesian update of belief state after observing token.
@@ -258,10 +244,6 @@ class Mess3HMM:
 
         kl = float(np.mean(kl_rates))
         return max(0.0, kl)  # KL must be non-negative
-
-    def kl_divergence_from(self, other: "Mess3HMM") -> float:
-        """Alias for kl_divergence_rate_from for backwards compatibility."""
-        return self.kl_divergence_rate_from(other)
 
 
 # Default component parameters

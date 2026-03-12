@@ -17,7 +17,6 @@ from torch.utils.data import Dataset, DataLoader
 
 from src.data.mess3 import Mess3HMM, build_default_components
 from src.data.belief_update import (
-    initial_belief,
     compute_belief_trajectory,
     beliefs_to_arrays,
 )
@@ -119,70 +118,6 @@ def generate_sequences(
 
     return tokens_all, pi_all, eta_all, comp_ids
 
-
-def build_dataloaders(
-    n_train: int = 50000,
-    n_val: int = 5000,
-    seq_length: int = 16,
-    batch_size: int = 256,
-    components: list[Mess3HMM] | None = None,
-    seed: int = 42,
-) -> tuple[DataLoader, DataLoader, list[Mess3HMM]]:
-    """
-    Build train and validation DataLoaders.
-
-    Args:
-        n_train: number of training sequences
-        n_val: number of validation sequences
-        seq_length: sequence length (context window)
-        batch_size: batch size for DataLoader
-        components: Mess3 component list (default: CLAUDE.md params)
-        seed: random seed
-
-    Returns:
-        train_loader: training DataLoader
-        val_loader: validation DataLoader
-        components: list of Mess3HMM instances used
-    """
-    if components is None:
-        components = build_default_components()
-
-    train_tokens, train_pi, train_eta, train_ids = generate_sequences(
-        n_train, seq_length, components, seed=seed
-    )
-    val_tokens, val_pi, val_eta, val_ids = generate_sequences(
-        n_val, seq_length, components, seed=seed + 1
-    )
-
-    train_dataset = Mess3Dataset(
-        tokens=torch.from_numpy(train_tokens),
-        pi_targets=torch.from_numpy(train_pi),
-        eta_targets=torch.from_numpy(train_eta),
-        component_ids=torch.from_numpy(train_ids),
-    )
-    val_dataset = Mess3Dataset(
-        tokens=torch.from_numpy(val_tokens),
-        pi_targets=torch.from_numpy(val_pi),
-        eta_targets=torch.from_numpy(val_eta),
-        component_ids=torch.from_numpy(val_ids),
-    )
-
-    train_loader = DataLoader(
-        train_dataset,
-        batch_size=batch_size,
-        shuffle=True,
-        num_workers=0,
-        pin_memory=True,
-    )
-    val_loader = DataLoader(
-        val_dataset,
-        batch_size=batch_size,
-        shuffle=False,
-        num_workers=0,
-        pin_memory=True,
-    )
-
-    return train_loader, val_loader, components
 
 
 def collect_activations_and_targets(

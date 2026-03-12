@@ -10,10 +10,8 @@ Methods:
 
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
 from sklearn.decomposition import PCA
 from dataclasses import dataclass
-from typing import Optional
 
 from src.data.mess3 import Mess3HMM
 from src.analysis.regression import fit_belief_regression

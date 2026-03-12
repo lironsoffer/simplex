@@ -9,7 +9,6 @@ Main analysis:
 
 import numpy as np
 import matplotlib.pyplot as plt
-from typing import Optional
 
 import torch
 from transformer_lens import HookedTransformer

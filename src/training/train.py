@@ -6,7 +6,6 @@ Saves checkpoints every checkpoint_every steps.
 Logs per-step and per-position loss.
 """
 
-import os
 import json
 import time
 import math

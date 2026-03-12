@@ -3,9 +3,10 @@ Linear regression from residual stream activations to belief state targets.
 
 Methods:
     - fit_belief_regression: fit linear map activations → belief targets
-    - compute_r2: R² of regression
+    - fit_belief_regression_oos: fit with held-out test split for OOS R²
     - extract_subspace_basis: top singular vectors of regression weight matrix
-    - r2_by_layer_and_position: R² table across layers and context positions
+    - extract_residual_stream_all_layers: extract activations at all layers
+    - project_out_subspace: project out a subspace from activations
 """
 
 import numpy as np
@@ -146,86 +147,6 @@ def extract_residual_stream_all_layers(
     return all_activations
 
 
-def r2_by_layer_and_position(
-    model: HookedTransformer,
-    tokens: torch.Tensor,
-    pi_targets: np.ndarray,
-    eta_targets: np.ndarray,
-    component_ids: np.ndarray,
-    batch_size: int = 256,
-    device: str | None = None,
-) -> dict:
-    """
-    Compute R² for π and each η_k regression at every layer and context position.
-
-    Args:
-        model: trained HookedTransformer
-        tokens: (N, L) int64
-        pi_targets: (N, L, K) float32
-        eta_targets: (N, L, K, 3) float32
-        component_ids: (N,) int64
-        batch_size: batch size for activation extraction
-        device: torch device
-
-    Returns:
-        results: dict with structure:
-            {
-                "pi_r2": np.ndarray (n_layers, L),
-                "eta_r2": np.ndarray (n_layers, L, K),
-                "pi_regression": list[list[RegressionResult]],   # [layer][position]
-                "eta_regression": list[list[list[RegressionResult]]],  # [layer][position][k]
-            }
-    """
-    if device is None:
-        device = str(next(model.parameters()).device)
-
-    n_layers = model.cfg.n_layers
-    N, L, K = pi_targets.shape
-
-    # Extract all activations
-    all_acts = extract_residual_stream_all_layers(model, tokens, batch_size, device)
-
-    pi_r2 = np.zeros((n_layers, L))
-    eta_r2 = np.zeros((n_layers, L, K))
-    pi_regression = []
-    eta_regression = []
-
-    for layer_idx in range(n_layers):
-        acts = all_acts[f"layer_{layer_idx}_resid_post"]  # (N, L, d_model)
-        pi_layer = []
-        eta_layer = []
-
-        for pos in range(L):
-            acts_pos = acts[:, pos, :]          # (N, d_model)
-            pi_pos = pi_targets[:, pos, :]      # (N, K)
-            eta_pos = eta_targets[:, pos, :, :] # (N, K, 3)
-
-            # π regression
-            pi_result = fit_belief_regression(acts_pos, pi_pos, n_subspace_components=K - 1)
-            pi_r2[layer_idx, pos] = pi_result.r2
-            pi_layer.append(pi_result)
-
-            # η_k regression (one per component)
-            eta_pos_list = []
-            eta_r2_pos = np.zeros(K)
-            for k in range(K):
-                eta_k_pos = eta_pos[:, k, :]  # (N, 3)
-                eta_result = fit_belief_regression(acts_pos, eta_k_pos, n_subspace_components=2)
-                eta_r2_pos[k] = eta_result.r2
-                eta_pos_list.append(eta_result)
-            eta_r2[layer_idx, pos] = eta_r2_pos
-            eta_layer.append(eta_pos_list)
-
-        pi_regression.append(pi_layer)
-        eta_regression.append(eta_layer)
-
-    return {
-        "pi_r2": pi_r2,
-        "eta_r2": eta_r2,
-        "pi_regression": pi_regression,
-        "eta_regression": eta_regression,
-    }
-
 
 def fit_belief_regression_oos(
     activations: np.ndarray,
@@ -290,48 +211,6 @@ def fit_belief_regression_oos(
 
     return result, r2_test
 
-
-def fit_component_subspace(
-    activations: np.ndarray,
-    targets: np.ndarray,
-    component_mask: np.ndarray,
-    alpha: float = 1e-4,
-    n_subspace_components: int = 2,
-    test_fraction: float = 0.2,
-    seed: int = 0,
-) -> tuple[RegressionResult, float]:
-    """
-    Fit a linear regression for the η_k subspace using only sequences from component k.
-
-    Filters activations and targets to those belonging to the specified component,
-    then delegates to fit_belief_regression_oos. This is the correct approach for
-    finding the η_k subspace because only sequences from component k have meaningful
-    within-component variation in η_k.
-
-    Args:
-        activations: (N, d_model) residual stream activations for ALL sequences
-        targets: (N, 3) η_k belief state targets for ALL sequences
-        component_mask: (N,) bool array, True for sequences from component k
-        alpha: Ridge regularisation strength
-        n_subspace_components: number of singular vectors to extract
-        test_fraction: fraction of filtered data to hold out for test evaluation
-        seed: random seed for reproducible train/test split
-
-    Returns:
-        (result, r2_test): RegressionResult fitted on the component-filtered train
-        split, and the out-of-sample R² on the component-filtered test split.
-    """
-    filtered_activations = activations[component_mask]
-    filtered_targets = targets[component_mask]
-
-    return fit_belief_regression_oos(
-        filtered_activations,
-        filtered_targets,
-        alpha=alpha,
-        n_subspace_components=n_subspace_components,
-        test_fraction=test_fraction,
-        seed=seed,
-    )
 
 
 def project_out_subspace(
