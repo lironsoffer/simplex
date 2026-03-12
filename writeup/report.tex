@@ -50,14 +50,23 @@ real-world situation.
 
 \textbf{Connection to in-context learning (ICL).}
 Riechers et al.~\cite{riechers2025} prove that ICL emerges \emph{necessarily}
-from non-ergodic pretraining.
-The model's in-context performance is coupled to its ability to identify which
-component is generating the current sequence.
-The synchronisation horizon
-$N^* = 1/\min_{k \neq k'} D_\mathrm{KL}(P_k \| P_{k'})$
-is the number of tokens needed to commit to one component.
-By choosing parameters with $N^* < 16$ (context window), this commitment
-happens within a single sequence.
+from non-ergodic pretraining: a model trained on a mixture of sources must
+learn to identify which source is generating the current sequence, and its
+in-context loss decay is governed by how quickly it can do so.
+They introduce the synchronisation horizon
+\[
+N^* = \frac{1}{\min_{k \neq k'} D_\mathrm{KL}(P_k \| P_{k'})}
+\]
+as the number of tokens required to commit to one component, and predict a
+sharp transition in in-context performance around position $N^*$.
+Their framework is information-theoretic and architecture-independent---it
+describes \emph{what} must happen but not \emph{where} in the model it happens.
+Our experiment provides the geometric complement: by tracking the meta-belief
+$\pi$ directly in the residual stream, we can observe the synchronisation
+transition as a spatial phenomenon---a sharp rise in $R^2(\pi)$ near position
+$N^*$---and identify which subspace implements it.
+By choosing parameters with $N^* \approx 9.6 < 16$ (context window), this
+commitment happens within a single sequence.
 
 \textbf{Connection to factored representations.}
 Shai et al.~\cite{shai2025factored} show that transformers trained on parallel
