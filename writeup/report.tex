@@ -328,16 +328,17 @@ consistent with the synchronisation horizon $N^* \approx 9.6$.
 
 \begin{table}[h]
 \centering
-\begin{tabular}{lcc}
+\begin{tabular}{lccc}
 \toprule
-Layer & CEV Dimensionality (95\%) & Predicted \\
+Layer & CEV (95\%) & CEV (100\%) & Predicted \\
 \midrule
-0 & 6 & 8 \\
-1 & 5 & 8 \\
+0 & 6  & 64 & 8 \\
+1 & 5  & 64 & 8 \\
 \bottomrule
 \end{tabular}
-\caption{PCA dimensionality (number of components explaining $\geq 95\%$
-variance) per layer.}
+\caption{PCA dimensionality per layer. CEV($p$\%) = fewest components explaining $\geq p\%$ of variance.
+All 64 residual stream dimensions carry non-zero variance; the first 5--6 account for 95\%, revealing a
+low-dimensional dominant subspace atop a long noise tail.}
 \label{tab:pca}
 \end{table}
 
