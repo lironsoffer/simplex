@@ -133,6 +133,7 @@ def plot_fractal(
     eta_k_targets: np.ndarray,
     component: Mess3HMM,
     component_name: str = "",
+    color: str = "steelblue",
     n_attractor_points: int = 80000,
     axes=None,
     save_path=None,
@@ -200,7 +201,7 @@ def plot_fractal(
                  s=0.2, c="lightgray", alpha=0.3, rasterized=True)
     pred_2d = simplex_to_2d(np.clip(predicted_eta, 0, None))
     ax_r.scatter(pred_2d[:, 0], pred_2d[:, 1],
-                 s=0.8, c="steelblue", alpha=0.5, rasterized=True)
+                 s=0.8, c=color, alpha=0.5, rasterized=True)
     ax_r.plot(v[:, 0], v[:, 1], "k-", lw=0.8, alpha=0.4)
     ax_r.set_aspect("equal")
     ax_r.set_xticks([]); ax_r.set_yticks([])
@@ -348,7 +349,7 @@ def plot_joint_9state_attractor(
     # ── Centre axis: π-simplex ──────────────────────────────────────────────
     ax_pi = fig.add_axes([0.15, 0.15, 0.70, 0.70])
     ax_pi.plot(pi_v_closed[:, 0], pi_v_closed[:, 1], 'k-', lw=1.5, alpha=0.5)
-    colors = ['royalblue', 'crimson', 'seagreen']
+    colors = ['steelblue', 'darkorange', 'forestgreen']
     for k in range(K):
         ax_pi.scatter(*pi_verts[k], s=120, c=colors[k], zorder=5)
         lbl_offset = [[-0.08, -0.06], [0.02, -0.06], [-0.03, 0.04]][k]

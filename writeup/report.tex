@@ -128,6 +128,22 @@ analytically using the two-step update rule (Section~\ref{sec:math}).
 These serve as regression targets in the geometry analysis.
 50{,}000 training sequences and 5{,}000 validation sequences were generated.
 
+Figure~\ref{fig:joint} illustrates the full joint 9-state belief geometry:
+the meta-belief $\pi$ lives on the central simplex, while each vertex hosts
+the MSP fractal of the corresponding component.
+The three fractals are disconnected, reflecting the non-ergodic block structure.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.6\textwidth]{../figures/joint_9state_attractor.png}
+\caption{Joint 9-state belief geometry.
+The centre shows the meta-belief $\pi$ simplex (which component?);
+each vertex hosts the MSP fractal attractor of that component (where within?).
+The three fractals are disconnected---no probability mass flows between
+components---reflecting the non-ergodic block structure of the corpus.}
+\label{fig:joint}
+\end{figure}
+
 \subsection{Architecture}
 
 Small GPT-2-style transformer via TransformerLens~\cite{nanda2022tl}:
@@ -450,17 +466,6 @@ trajectories (left) vs.\ regression-predicted $\eta_k$ from residual stream
 activations (right), plotted in barycentric simplex coordinates.
 The regression output reproduces the MSP fractal geometry.}
 \label{fig:fractal}
-\end{figure}
-
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.6\textwidth]{../figures/joint_9state_attractor.png}
-\caption{Joint 9-state belief geometry.
-The centre shows the meta-belief $\pi$ simplex; each vertex hosts the
-MSP fractal attractor of the corresponding component.
-The joint belief space consists of three disconnected fractals---one
-per component---reflecting the non-ergodic block structure.}
-\label{fig:joint}
 \end{figure}
 
 \subsection{Training Dynamics}

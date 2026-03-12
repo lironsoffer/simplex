@@ -254,6 +254,7 @@ def phase_analyze(device: str):
     results_path = DIRS["results"]
 
     components = build_default_components()
+    COMPONENT_COLORS = ["steelblue", "darkorange", "forestgreen"]
     n_star = compute_nstar_analytical(components)
     component_names = [p.name for p in COMPONENT_PARAMS]
 
@@ -419,11 +420,10 @@ def phase_analyze(device: str):
     # ── 3e. MSP Fractals (coloured, one panel per component) ──
     print("\n[3e] MSP Fractals...")
     from src.analysis.pca import compute_msp_attractor, simplex_to_2d
-    colors_msp = ["steelblue", "darkorange", "forestgreen"]
     fig_msp, axes_msp = plt.subplots(1, K, figsize=(4 * K, 4))
     if K == 1:
         axes_msp = [axes_msp]
-    for k, (comp, ax, color) in enumerate(zip(components, axes_msp, colors_msp)):
+    for k, (comp, ax, color) in enumerate(zip(components, axes_msp, COMPONENT_COLORS)):
         attractor = compute_msp_attractor(comp, n_iterations=80000)
         xy = simplex_to_2d(attractor)
         ax.scatter(xy[:, 0], xy[:, 1], s=0.3, c=color, alpha=0.4)
@@ -476,6 +476,7 @@ def phase_analyze(device: str):
             eta_k_targets=eta_k_flat,
             component=components[k],
             component_name=component_names[k],
+            color=COMPONENT_COLORS[k],
             axes=axes_frac[k],
         )
 
