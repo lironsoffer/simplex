@@ -10,6 +10,7 @@ __pycache__/
 
 # Checkpoints (large binary model files)
 checkpoints/*.pt
+checkpoints/**/*.pt
 
 # Data arrays (large binary files, regenerate with --phase data)
 data/*.npy
