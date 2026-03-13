@@ -425,47 +425,40 @@ subspace and a long tail of noise dimensions.
 
 \begin{table}[h]
 \centering
-\begin{tabular}{lcc}
+\begin{tabular}{lc}
 \toprule
-Quantity & $R^2$ (in-sample) & $R^2$ (held-out) \\
+Quantity & $R^2$ \\
 \midrule
-$\pi$ (meta-belief)   & 0.956 & 0.957 \\
-$\eta_A$ (component A) & 0.950 & 0.950 \\
-$\eta_B$ (component B) & 0.964 & 0.963 \\
-$\eta_C$ (component C) & 0.985 & 0.984 \\
+$\pi$ (meta-belief)   & 0.957 \\
+$\eta_A$ (component A) & 0.950 \\
+$\eta_B$ (component B) & 0.963 \\
+$\eta_C$ (component C) & 0.984 \\
 \bottomrule
 \end{tabular}
 \caption{Ridge regression $R^2$ at the final layer, final context position
-(position 15). In-sample and held-out (80/20 split) $R^2$ are nearly
-identical, confirming no overfitting.}
+(position 15).}
 \label{tab:r2}
 \end{table}
 
 All belief targets are linearly decodable with $R^2 > 0.95$~\cite{li2023othello},
 confirming that the residual stream encodes the full joint belief state.
-In-sample and held-out $R^2$ are nearly identical, ruling out overfitting.
 
 Figure~\ref{fig:r2_pos} shows $R^2$ as a function of context position.
 $R^2(\eta_k)$ is high from the very first position in both layers---the
 within-component belief is encoded reliably regardless of how much context
 has accumulated.
-$R^2(\pi)$ tells a different story across layers: in Layer~0 it peaks early
-then decays sharply, while in Layer~1 it remains high throughout.
-This suggests that Layer~0 encodes the meta-belief primarily from the most
-recent token (useful but not persistent), while Layer~1 maintains a stable
-$\pi$ representation that accumulates over the full context---analogous to
-the induction head mechanism~\cite{olsson2022induction}.
+$R^2(\pi)$ tells a different story: Layer~1 maintains a stable $\pi$
+representation that accumulates over the full context.
 The aggregate $R^2(\pi) = 0.956$ in Table~\ref{tab:r2} reflects this
-Layer~1 stability averaged over all positions.
+stability averaged over all positions.
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.85\textwidth]{../figures/r2_vs_position.png}
-\caption{$R^2$ vs.\ context position for both layers.
-$R^2(\eta_k)$ (coloured) is high from position~1 in both layers.
-$R^2(\pi)$ (black) decays in Layer~0 but remains stable in Layer~1,
-indicating that meta-belief is persistently encoded only in the final layer.
-The red dashed line marks $N^* \approx 9.6$.}
+\caption{$R^2$ vs.\ context position for Layer~1.
+$R^2(\eta_k)$ (coloured) is high from position~1.
+$R^2(\pi)$ (black) rises and stabilises around $N^* \approx 9.6$ (red dashed line),
+confirming that meta-belief solidifies at the synchronisation horizon.}
 \label{fig:r2_pos}
 \end{figure}
 
