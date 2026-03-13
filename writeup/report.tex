@@ -676,6 +676,147 @@ intermediate emission strength ($\alpha = 0.80$), making its belief geometry
 somewhat ``between'' those of A and C.
 
 % ──────────────────────────────────────────────────────────────────────────────
+\section{Additional Analysis: Dimension Sweep}
+\label{sec:dim_sweep}
+% ──────────────────────────────────────────────────────────────────────────────
+
+\textbf{Motivation.}
+The main experiment uses $d_\mathrm{model}=64$, giving the model roughly $8\times$
+more residual stream dimensions than the theoretical minimum for a full factored
+representation ($K+1$ subspaces of 2D each $= 8$ dimensions for $K=3$).
+This raises the question: is the inductive bias toward factored representations
+an artefact of surplus capacity, or does it persist under pressure?
+
+Separately, we ask which belief state the model prioritises when it \emph{cannot}
+represent both.
+The factored representation result of Shai et al.~\cite{shai2025factored} says
+$\pi$ and $\eta_k$ are equally important in the sense of conditional independence,
+but they are not equally important for the \emph{next-token prediction task}.
+Knowing $\pi$ alone does not determine the next-token distribution---one also needs
+$\eta_k$ for the active component.
+Conversely, $\eta_k$ (plus implicit knowledge of which component is active from
+context) is sufficient.
+After position $N^*$, the context itself encodes component identity, making $\pi$
+in the residual stream redundant; $\eta_k$ must be maintained throughout.
+
+We therefore expect that under capacity pressure the model encodes $\eta_k$ first.
+
+\textbf{Setup.}
+We train four additional models with $d_\mathrm{model} \in \{2, 4, 6, 8\}$,
+keeping all other hyperparameters fixed (2 layers, $n_\text{heads} \times d_\text{head}
+= d_\text{model}$ throughout, see Table~\ref{tab:dim_configs}).
+Each model is trained for 20{,}000 steps on the pre-saved 50{,}000 training sequences
+via a DataLoader (shuffled, cycled), which avoids the per-step HMM generation
+overhead that dominates for tiny models.
+Note $d=8$ is the theoretical minimum capacity for a full factored representation.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{rrrrrr}
+\toprule
+$d_\mathrm{model}$ & $n_\mathrm{heads}$ & $d_\mathrm{head}$ & $d_\mathrm{mlp}$
+  & Params & Val loss \\
+\midrule
+2  & 1 & 2 & 8   &     199 & 1.087 \\
+4  & 2 & 2 & 16  &     587 & 0.880 \\
+6  & 2 & 3 & 24  &   1{,}167 & 0.862 \\
+8  & 4 & 2 & 32  &   1{,}939 & 0.863 \\
+64 & 4 & 16 & 256 & 101{,}507 & 0.862 \\
+\bottomrule
+\end{tabular}
+\caption{Model configurations for the dimension sweep.
+Val loss at $d=6$ already matches $d=64$; the task is saturated at 6 dimensions.}
+\label{tab:dim_configs}
+\end{table}
+
+\textbf{Results.}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{rrrrrr}
+\toprule
+$d$ & $R^2(\pi)$ & $R^2(\eta_A)$ & $R^2(\eta_B)$ & $R^2(\eta_C)$ & CEV dim \\
+\midrule
+2  & $-0.003$ & 0.384 & 0.387 & 0.449 & 2 \\
+4  &  0.148   & 0.795 & 0.820 & 0.851 & 3 \\
+6  &  0.649   & 0.771 & 0.799 & 0.745 & 4 \\
+8  &  0.686   & 0.830 & 0.853 & 0.865 & 4 \\
+64 &  0.957   & 0.950 & 0.963 & 0.984 & 5 \\
+\bottomrule
+\end{tabular}
+\caption{Out-of-sample $R^2$ for all belief state targets and PCA CEV
+dimensionality, at the final layer and final context position.}
+\label{tab:dim_r2}
+\end{table}
+
+Figure~\ref{fig:r2_vs_dim} and Table~\ref{tab:dim_r2} tell a clear story.
+$\eta_k$ encoding saturates early: $R^2(\eta_k) \geq 0.80$ already at $d=4$,
+and improves only marginally thereafter.
+By contrast, $R^2(\pi)$ starts near zero and grows slowly, reaching only 0.69
+at $d=8$---the theoretical minimum for a full factored representation---and
+0.957 only at $d=64$.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\textwidth]{../figures/dim_sweep/r2_vs_dim.png}
+\caption{Out-of-sample $R^2$ vs.\ $d_\mathrm{model}$ for all belief state targets.
+$\eta_k$ (dashed) saturates by $d=4$; $\pi$ (solid black) grows slowly and requires
+$d \gg 8$ to approach the quality achieved for $\eta_k$.
+The dotted line marks $d=8$, the theoretical minimum for a full factored
+representation.}
+\label{fig:r2_vs_dim}
+\end{figure}
+
+The scatter plots in Figure~\ref{fig:scatter_d4_d8} confirm this geometrically.
+At $d=4$, PC projections coloured by component identity (left) show a single
+indistinguishable blob---the model has essentially zero $\pi$ encoding---while
+the same projections coloured by dominant within-component state (right) form
+clean diagonal bands.
+At $d=8$, component clouds begin to separate but still overlap substantially,
+while within-component structure remains well-resolved.
+
+\begin{figure}[h]
+\centering
+\begin{subfigure}{\textwidth}
+  \includegraphics[width=\textwidth]{../figures/dim_sweep/scatter_d4.png}
+  \caption{$d=4$: no component separation (left); clear within-component bands
+  (right).}
+\end{subfigure}
+\vspace{0.5em}
+\begin{subfigure}{\textwidth}
+  \includegraphics[width=\textwidth]{../figures/dim_sweep/scatter_d8.png}
+  \caption{$d=8$: partial component separation (left); within-component structure
+  preserved (right).}
+\end{subfigure}
+\caption{Residual stream PCA projections coloured by component identity (left)
+and dominant within-component state (right).}
+\label{fig:scatter_d4_d8}
+\end{figure}
+
+A subtlety: at $d=6$, $R^2(\eta_k)$ \emph{drops} slightly relative to $d=4$
+(e.g.\ $\eta_A$: $0.795 \to 0.771$), recovering at $d=8$.
+This suggests that when the model first gains enough capacity to start encoding
+$\pi$ ($d=6$), it does so partly at the expense of within-component encoding,
+before recovering both at $d=8$.
+
+\textbf{Interpretation.}
+The result confirms the prediction: $\eta_k$ is prioritised over $\pi$ under
+capacity pressure.
+The explanation is information-theoretic.
+The residual stream should encode what the context does not already make obvious.
+$\pi$ collapses after $N^* \approx 9.6$ tokens---the context sequence implicitly
+carries the component identity after that point.
+$\eta_k$, by contrast, requires ongoing Bayesian integration and never becomes
+obvious from the raw tokens; it must be maintained explicitly in the residual
+stream throughout the sequence.
+Furthermore, $\eta_k$ directly determines the next-token distribution
+($P(x_{t+1}) \approx \eta_k \cdot T_k^{(x_{t+1})} \cdot \mathbf{1}$ after
+synchronisation), while $\pi$ is a routing variable whose gradient signal vanishes
+once synchronisation is complete.
+At small $d$, the loss gradient therefore drives the model to encode $\eta_k$
+first, leaving $\pi$ as a low-priority secondary representation.
+
+% ──────────────────────────────────────────────────────────────────────────────
 \section{Discussion}
 \label{sec:discussion}
 % ──────────────────────────────────────────────────────────────────────────────
