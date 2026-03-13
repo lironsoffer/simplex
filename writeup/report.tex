@@ -355,9 +355,12 @@ TransformerLens hooks extract activations at each layer's output
 (\texttt{blocks.\{i\}.hook\_resid\_post}) for all validation sequences.
 
 \textbf{Regression-based subspace identification}~\cite{shai2024belief}.
-We fit a Ridge regression from residual stream activations
+We fit a linear map from residual stream activations
 $\mathbf{a} \in \mathbb{R}^{d_\mathrm{model}}$ to ground-truth belief targets
-(either $\pi \in \mathbb{R}^3$ or $\eta_k \in \mathbb{R}^3$).
+(either $\pi \in \mathbb{R}^3$ or $\eta_k \in \mathbb{R}^3$),
+implemented as Ridge regression with $\alpha = 10^{-4}$ on normalised
+activations---equivalent to OLS at this regularisation strength, used for
+numerical stability.
 The top singular vectors of the weight matrix span the
 \emph{subspace} in which the belief state is encoded.
 $R^2$ measures how well the full subspace recovers the target.
@@ -474,25 +477,36 @@ $\eta_B$ (component B) & 0.964 & 0.963 \\
 $\eta_C$ (component C) & 0.985 & 0.984 \\
 \bottomrule
 \end{tabular}
-\caption{Linear regression $R^2$ at the final layer, final context position
+\caption{Ridge regression $R^2$ at the final layer, final context position
 (position 15). In-sample and out-of-sample (80/20 split) $R^2$ are nearly
 identical, confirming no overfitting.}
 \label{tab:r2}
 \end{table}
 
 All belief targets are linearly decodable with $R^2 > 0.95$, confirming
-predictions P2 and P3.
+that the residual stream encodes the full joint belief state.
+In-sample and out-of-sample $R^2$ are nearly identical, ruling out overfitting.
+
 Figure~\ref{fig:r2_pos} shows $R^2$ as a function of context position.
-$R^2(\pi)$ rises sharply between positions 8 and 12---spanning the
-synchronisation horizon $N^* \approx 9.6$---while $R^2(\eta_k)$ is high
-from early positions.
+$R^2(\eta_k)$ is high from the very first position in both layers---the
+within-component belief is encoded reliably regardless of how much context
+has accumulated.
+$R^2(\pi)$ tells a different story across layers: in Layer~0 it peaks early
+then decays sharply, while in Layer~1 it remains high throughout.
+This suggests that Layer~0 encodes the meta-belief primarily from the most
+recent token (useful but not persistent), while Layer~1 maintains a stable
+$\pi$ representation that accumulates over the full context.
+The aggregate $R^2(\pi) = 0.956$ in Table~\ref{tab:r2} reflects this
+Layer~1 stability averaged over all positions.
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.85\textwidth]{../figures/r2_vs_position.png}
 \caption{$R^2$ vs.\ context position for both layers.
-$R^2(\pi)$ (black) rises sharply near $N^*$ (red dashed line).
-$R^2(\eta_k)$ (coloured) is high throughout.}
+$R^2(\eta_k)$ (coloured) is high from position~1 in both layers.
+$R^2(\pi)$ (black) decays in Layer~0 but remains stable in Layer~1,
+indicating that meta-belief is persistently encoded only in the final layer.
+The red dashed line marks $N^* \approx 9.6$.}
 \label{fig:r2_pos}
 \end{figure}
 
