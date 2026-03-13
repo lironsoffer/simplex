@@ -66,12 +66,15 @@ exactly.
 
 The experimental design is grounded in three prior results:
 \begin{itemize}[noitemsep]
-  \item Shai et al.~\cite{shai2024belief}: single ergodic Mess3 $\to$
-        fractal geometry in residual stream.
-  \item Riechers et al.~\cite{riechers2025}: non-ergodic mixture $\to$
-        ICL loss dynamics (but not geometry).
-  \item Shai et al.~\cite{shai2025factored}: parallel factors $\to$
-        factored geometry (but parallel streams, not temporal mixtures).
+  \item Shai et al.~\cite{shai2024belief} show that a transformer trained on a
+        single ergodic Mess3 process encodes belief states as a fractal in the
+        residual stream.
+  \item Riechers et al.~\cite{riechers2025} prove that non-ergodic pretraining
+        necessarily produces ICL, governed by a synchronisation horizon $N^*$,
+        but say nothing about internal geometry.
+  \item Shai et al.~\cite{shai2025factored} show that parallel factors are
+        encoded in orthogonal subspaces---a result for simultaneous streams,
+        not temporal mixtures.
 \end{itemize}
 This experiment combines the non-ergodic setup of Riechers et al.\ with the
 geometry analysis of Shai et al.\ to ask: \emph{non-ergodic mixture $\to$
