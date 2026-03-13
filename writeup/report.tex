@@ -684,20 +684,31 @@ somewhat ``between'' those of A and C.
 
 \subsection{Which Hypothesis Best Fits?}
 
-The evidence strongly supports \textbf{H2 (Factored)}:
-\begin{itemize}[noitemsep]
-  \item $R^2 > 0.95$ for all belief targets.
-  \item $\pi$--$\eta_k$ subspace overlap 0.17--0.19, consistent with near-orthogonality.
-  \item $R^2$ drops $< 0.001$ in all projection tests.
-  \item Component-specific fractal geometry confirmed by vary-one analysis.
-\end{itemize}
-The pre-registered prediction (P1) was not confirmed: CEV dimensionality is 5--6 rather
-than the predicted 8.
-This is explained partly by component C's degenerate attractor and partly by
-within-subspace compression.
-The moderate $\eta_k$--$\eta_{k'}$ overlap (0.53--0.69) may reflect a mild
-H3-like compression in the shared token directions, while the $\pi$--$\eta_k$
-separation remains clean.
+The picture is mixed: H2 holds cleanly for the $\pi$--$\eta$ split but not
+for the internal structure of the $\eta_k$ subspaces.
+
+\textbf{H2 confirmed for $\pi$ vs.\ $\eta_k$.}
+The projection tests are decisive: removing the $\pi$ subspace from activations
+causes $R^2$ drops of less than 0.001 for all $\eta_k$ targets, and removing
+any $\eta_k$ subspace leaves $\pi$ regression unchanged.
+The $\pi$--$\eta_k$ subspace overlaps (0.17--0.19) confirm near-orthogonality.
+The transformer has cleanly separated meta-belief from within-component belief
+into distinct residual stream directions.
+
+\textbf{H2 not confirmed for $\eta_k$ vs.\ $\eta_{k'}$.}
+H2 predicts four mutually orthogonal subspaces, but the three $\eta_k$
+subspaces overlap substantially with each other (0.53--0.69).
+This is more consistent with H3 (Superposition): the model does not dedicate a
+separate 2D subspace to each component's fractal, but instead packs the three
+within-component beliefs into a shared, partially overlapping region of
+residual stream space.
+The vary-one analysis shows that component-specific fits are more distinct
+(A--C overlap 0.21) than the global fits suggest, so the components are not
+fully merged---but they are far from orthogonal.
+
+The pre-registered prediction (P1, CEV $\approx 8$) was not confirmed: both
+layers use only 5--6 dimensions to explain 95\% of variance, consistent with
+the compressed $\eta_k$ representation described above.
 
 A notable surprise in the training dynamics: within-component beliefs ($\eta_k$)
 emerge early (step~100, $R^2 > 0.9$), while the meta-belief ($\pi$) lags behind
@@ -708,10 +719,12 @@ This suggests the model first learns to track per-component token statistics
 
 \subsection{Implications}
 
-\textbf{Non-ergodic pretraining induces factored representations.}
-The transformer does not need explicit supervision to separate ``what component
-am I in?'' from ``where within this component am I?''
-The block structure of the generative process is sufficient.
+\textbf{Non-ergodic pretraining induces partial factoring.}
+The transformer cleanly separates ``what component am I in?'' ($\pi$) from
+``where within this component am I?'' ($\eta$) without explicit supervision.
+However, the three within-component beliefs are not further separated from each
+other---they share residual stream directions, suggesting that factoring happens
+at the coarsest level of the hierarchy (meta vs.\ within) but not below it.
 
 \textbf{Two-level belief structure maps onto two-phase training dynamics.}
 Within-component geometry is learned first and meta-belief routing emerges
