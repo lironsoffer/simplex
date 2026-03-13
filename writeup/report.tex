@@ -390,24 +390,15 @@ and superposition.}
 \end{figure}
   
 Figure~\ref{fig:pca} plots this.
-This suggests the transformer is \emph{more efficient} than the theoretical
-minimum representation.
-We offer three possible explanations, though we cannot confirm which dominates:
-\begin{enumerate}[noitemsep]
-  \item \textbf{Component C's near-degenerate attractor.}
-        With $\alpha=0.55$, component C has only $\sim$9 reachable belief
-        states, collapsing $\eta_C$ from a 2D subspace toward a near-discrete
-        structure that requires far less than 2 dimensions.
-  \item \textbf{Fractal attractors don't fill their 2D subspaces uniformly.}
-        Each MSP attractor is a fractal with dimension strictly less than 2.
-        Belief states cluster along lower-dimensional structures within each
-        2D subspace, so PCA sees less than 2 effective dimensions per factor.
-  \item \textbf{Superposition enabled by attractor sparsity.}
-        Because the attractors are sparse, the transformer can pack multiple
-        belief directions into shared dimensions without interference, achieving
-        near-perfect $R^2 > 0.95$ with fewer dimensions than a uniform
-        distribution would require.
-\end{enumerate}
+One possible explanation is that the Mess3 dynamics only visit a sparse subset of
+the belief simplex: rather than covering the full triangle of possible belief states,
+trajectories trace the MSP attractor, a self-similar curve that occupies fewer than
+2 effective dimensions.
+PCA captures this sparse structure directly, requiring fewer components than
+the full 2D subspace would demand.
+Component C is an extreme case: with $\alpha=0.55$, only $\sim$9 belief states are
+reachable, effectively reducing $\eta_C$ to a near-discrete structure that
+contributes almost nothing to the PCA dimension count.
 At 100\% CEV both layers require all 64 dimensions,
 confirming a sharp transition between the dominant low-dimensional belief
 subspace and a long tail of noise dimensions.
