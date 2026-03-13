@@ -35,7 +35,8 @@ identifying which component is active (meta-belief $\pi$) and tracking
 within-component state ($\eta_k$).
 We predict that residual stream activations encode these in orthogonal subspaces (H2).
 Analysis confirms H2 for the $\pi$--$\eta$ split but not for the
-$\eta_k$--$\eta_{k'}$ structure, consistent with superposition.
+$\eta_k$--$\eta_{k'}$ structure (overlap 0.53--0.69), which may reflect
+structural similarity across components or superposition.
 Training dynamics reveal $\eta_k$ representations emerge before $\pi$,
 and a capacity pressure analysis confirms that $\eta_k$ is prioritised over $\pi$
 when dimensions are scarce, with the $\pi$--$\eta_k$ separation preserved even
@@ -472,9 +473,14 @@ token alphabet.}
 \end{table}
 
 $\pi$ is nearly orthogonal to all $\eta_k$ subspaces (overlap 0.17--0.19).
-The moderate $\eta_k$--$\eta_{k'}$ overlap (0.53--0.69) reflects the shared
-3-token alphabet: all components respond to the same tokens, inducing partially
-shared within-component directions, consistent with superposition~\cite{elhage2022superposition}.
+The moderate $\eta_k$--$\eta_{k'}$ overlap (0.53--0.69) could reflect two
+non-exclusive explanations.
+First, all three components share the same 3-token alphabet and the same simplex
+geometry, so their belief directions may be structurally similar regardless of how
+the model organises them.
+Second, the model may be packing the three $\eta_k$ into shared dimensions via
+superposition~\cite{elhage2022superposition}.
+The data are consistent with both; we cannot distinguish them here.
 
 As a direct functional test, removing the $\pi$ subspace from activations and
 re-running $\eta_k$ regression yields $R^2$ drops of less than 0.001 in all cases,
@@ -598,7 +604,7 @@ within-component structure to compare.
 %somewhat ``between'' those of A and C.
 
 % ──────────────────────────────────────────────────────────────────────────────
-\section{Additional Analysis: Belief State Priority Under Capacity Pressure}
+\section{Belief State Priority Under Capacity Pressure}
 \label{sec:dim_sweep}
 % ──────────────────────────────────────────────────────────────────────────────
 
@@ -730,9 +736,6 @@ This is more consistent with H3 (Superposition): the model does not dedicate a
 separate 2D subspace to each component's fractal, but instead packs the three
 within-component beliefs into a shared, partially overlapping region of
 residual stream space.
-The vary-one analysis shows that component-specific fits are more distinct
-(A--C overlap 0.208) than the global fits suggest, so the components are not
-fully merged, but they are far from orthogonal.
 
 The pre-registered prediction (CEV dimensionality $\approx 8$) was not confirmed:
 both layers use only 5--6 dimensions to explain 95\% of variance, consistent with
@@ -754,16 +757,11 @@ However, the three within-component beliefs are not further separated from each
 other; they share residual stream directions, suggesting that factoring happens
 at the coarsest level of the hierarchy (meta vs.\ within) but not below it.
 
-\textbf{Two-level belief structure maps onto two-phase training dynamics.}
+\textbf{Training dynamics follow a two-phase ordering.}
 Within-component geometry is learned first and meta-belief routing emerges
 second; the ordering reflects loss reduction efficiency, not conceptual
 priority.
 
-\textbf{In-context learning has geometric structure.}
-ICL in real language models may involve a $\pi$-like routing circuit that
-activates domain-specific $\eta$-like representations.
-The factored geometry found here suggests these circuits can be linearly
-separated in residual stream space.
 
 \subsection{Limitations}
 
@@ -784,16 +782,12 @@ directly to language models without synthetic proxy tasks.
 A transformer trained on a non-ergodic mixture of Mess3 processes learns a
 hierarchically factored residual stream geometry: meta-belief $\pi$ is encoded
 in a subspace nearly orthogonal to all within-component beliefs $\eta_k$, while
-the $\eta_k$ subspaces are partially entangled due to their shared geometric
-structure on the 2-simplex.
-$R^2(\pi)$ rises sharply by position~2, earlier than the synchronisation
-horizon $N^* \approx 9.6$ predicted by Riechers et al.~\cite{riechers2025}:
-linear decodability requires only systematic covariation with component
-identity, which the first highly-diagnostic token already provides, while
-full synchronisation (commitment to one vertex) still requires $\approx N^*$
-tokens.
-Training dynamics show $\eta_k$ representations emerge an order of magnitude earlier than $\pi$ (step~100 vs.\ 2{,}000), reflecting loss-gradient priority.
-A capacity pressure sweep ($d \in \{2,4,6,8,64\}$) confirms this hierarchy: the model suppresses $\pi$ almost entirely at $d=4$ while maintaining $R^2(\eta_k) > 0.80$, ruling out that the factored geometry at $d=64$ is an artifact of surplus capacity.
+the $\eta_k$ subspaces are partially entangled, with overlap 0.53--0.69.
+Training dynamics show $\eta_k$ representations emerge an order of magnitude
+earlier than $\pi$ (step~100 vs.\ 2{,}000).
+Varying model dimension confirms this hierarchy: the model suppresses $\pi$
+almost entirely at $d=4$ while maintaining $R^2(\eta_k) > 0.80$, ruling out
+that the $\pi$--$\eta_k$ orthogonality at $d=64$ is an artifact of surplus capacity.
 Future work should test whether these geometric signatures generalise to larger
 models and richer token alphabets.
 
