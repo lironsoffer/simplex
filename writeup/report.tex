@@ -350,21 +350,24 @@ four 2D subspaces under H2.
 \label{sec:methods}
 % ──────────────────────────────────────────────────────────────────────────────
 
-\textbf{Residual stream extraction.}
-TransformerLens hooks extract activations at each layer's output
-(\texttt{blocks.\{i\}.hook\_resid\_post}) for all validation sequences.
-
 \textbf{Regression-based subspace identification}~\cite{shai2024belief}.
-We fit a linear map from residual stream activations
-$\mathbf{a} \in \mathbb{R}^{d_\mathrm{model}}$ to ground-truth belief targets
-(either $\pi \in \mathbb{R}^3$ or $\eta_k \in \mathbb{R}^3$),
-implemented as Ridge regression with $\alpha = 10^{-4}$ on normalised
-activations---equivalent to OLS at this regularisation strength, used for
-numerical stability.
-The top singular vectors of the weight matrix span the
-\emph{subspace} in which the belief state is encoded.
-$R^2$ measures how well the full subspace recovers the target.
-Out-of-sample $R^2$ (80\%/20\% train/test split) guards against overfitting.
+We fit a linear map $W \in \mathbb{R}^{3 \times d_\mathrm{model}}$ from residual
+stream activations $\mathbf{a} \in \mathbb{R}^{d_\mathrm{model}}$ (normalised to
+zero mean and unit variance per dimension) to ground-truth belief targets
+$\mathbf{b} \in \mathbb{R}^3$ (either $\pi$ or $\eta_k$) via Ridge regression
+($\alpha = 10^{-4}$).
+Linear decodability is measured by the coefficient of determination pooled across
+all three simplex coordinates,
+\[
+R^2 = 1 - \frac{\sum_{i,j}(b_{ij} - \hat{b}_{ij})^2}
+               {\sum_{i,j}(b_{ij} - \bar{b}_j)^2},
+\]
+reported on a held-out 20\% test split (fit on 80\%).
+To identify the subspace encoding the belief, we compute the SVD $W = U\Sigma V^\top$:
+the top-2 right singular vectors (rows of $V^\top$) are the 2 directions in
+activation space along which the predictor varies most, spanning the dominant
+2D belief-encoding subspace.
+This basis is used in all subsequent overlap and projection tests.
 
 \textbf{Subspace overlap metric}~\cite{shai2025factored}.
 For two subspaces with orthonormal bases $Q_A, Q_B$, the overlap is
