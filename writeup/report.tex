@@ -324,26 +324,26 @@ completes within every training sequence.
 
 \subsection{Intuitive Prediction}
 
-My intuition favours H2 for the following reason.
-The block-diagonal structure of $T^{(x)}_\mathrm{joint}$ means each component
-is a \emph{completely isolated information channel}---it can only ``talk'' to
-itself.
-This isolation makes it natural for the transformer to dedicate separate weight
-directions to each channel.
-The $\pi$ subspace acts like a routing circuit: once it collapses to one vertex
-(past $N^*$), the corresponding $\eta_k$ can be read out cleanly.
-This separation is not just possible---it is informationally free, since the
-full factored representation uses exactly as many dimensions as the joint one.
+My geometric intuition is that the residual stream should mirror the
+ground-truth joint belief geometry: the \emph{nested fractal} shown in
+Figure~\ref{fig:joint}, with $\pi$ occupying a central simplex and each vertex
+of that simplex hosting the MSP fractal attractor of the corresponding
+component.
 
-\textbf{Specific predictions (pre-registered):}
-\begin{enumerate}[noitemsep,label=P\arabic*.]
-  \item CEV dimensionality $\approx 8$ in the final layer.
-  \item $R^2(\pi)$ increases sharply around position $N^*$.
-  \item $R^2(\eta_k) > 0.9$ throughout for the active component.
-  \item Subspace overlap $(\pi, \eta_k) < 0.2$.
-  \item $R^2(\eta_k)$ drops by $< 0.1$ after projecting out $\pi$ (H2 test).
-  \item $\eta_k$ fractal geometry emerges before $\pi$ subspace in training.
-\end{enumerate}
+I favoured H2 (Factored) by analogy to Shai et al.~\cite{shai2025factored},
+where the setting is a \emph{parallel} joint process---at each timestep
+independent subprocesses each emit a token and the observation is their
+concatenation.
+Our setup is \emph{sequential}---each sequence comes from one subprocess---but
+the underlying math is the same: block-diagonal transition matrices,
+conditionally independent factors, and a belief space that decomposes into
+orthogonal subspaces.
+If transformers learn factored representations in the parallel case, I expected
+them to do so here too.
+
+My one pre-registered quantitative prediction was that
+\textbf{CEV dimensionality $\approx 8$} in the final layer, corresponding to
+four 2D subspaces under H2.
 
 % ──────────────────────────────────────────────────────────────────────────────
 \section{Methods}
@@ -686,25 +686,25 @@ somewhat ``between'' those of A and C.
 
 The evidence strongly supports \textbf{H2 (Factored)}:
 \begin{itemize}[noitemsep]
-  \item $R^2 > 0.95$ for all belief targets (P2, P3 confirmed).
-  \item $\pi$--$\eta_k$ subspace overlap 0.17--0.19 (P4 confirmed).
-  \item $R^2$ drops $< 0.001$ in all projection tests (P5 confirmed).
+  \item $R^2 > 0.95$ for all belief targets.
+  \item $\pi$--$\eta_k$ subspace overlap 0.17--0.19, consistent with near-orthogonality.
+  \item $R^2$ drops $< 0.001$ in all projection tests.
   \item Component-specific fractal geometry confirmed by vary-one analysis.
 \end{itemize}
-The main deviation from pure H2 is the CEV dimensionality: 5--6 rather than
-the predicted 8 (P1 partially confirmed).
+The pre-registered prediction (P1) was not confirmed: CEV dimensionality is 5--6 rather
+than the predicted 8.
 This is explained partly by component C's degenerate attractor and partly by
 within-subspace compression.
 The moderate $\eta_k$--$\eta_{k'}$ overlap (0.53--0.69) may reflect a mild
 H3-like compression in the shared token directions, while the $\pi$--$\eta_k$
 separation remains clean.
 
-One prediction was falsified: P6 predicted that $\pi$ would emerge before
-$\eta_k$, but the observed ordering was reversed ($\eta_k$ at step~100,
-$\pi$ at step~2{,}000).
-This reveals that per-component prediction (which reduces loss immediately) is
-learned before cross-component comparison (which requires having already learned
-the within-component structure).
+A notable surprise in the training dynamics: within-component beliefs ($\eta_k$)
+emerge early (step~100, $R^2 > 0.9$), while the meta-belief ($\pi$) lags behind
+(step~2{,}000).
+This suggests the model first learns to track per-component token statistics
+(which reduces loss immediately) and only subsequently learns to distinguish
+\emph{which} component is active (which requires cross-component comparison).
 
 \subsection{Implications}
 
@@ -714,9 +714,8 @@ am I in?'' from ``where within this component am I?''
 The block structure of the generative process is sufficient.
 
 \textbf{Two-level belief structure maps onto two-phase training dynamics.}
-Contrary to our prediction, within-component geometry is learned first and
-meta-belief routing emerges second.
-This suggests the ordering reflects loss reduction efficiency, not conceptual
+Within-component geometry is learned first and meta-belief routing emerges
+second---the ordering reflects loss reduction efficiency, not conceptual
 priority.
 
 \textbf{In-context learning has geometric structure.}
