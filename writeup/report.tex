@@ -370,14 +370,15 @@ activation space along which the predictor varies most, spanning the dominant
 This basis is used in all subsequent overlap and projection tests.
 
 \textbf{Subspace overlap metric}~\cite{shai2025factored}.
-For two subspaces with orthonormal bases $Q_A, Q_B$, the overlap is
-$\|Q_A Q_B^\top\|_F / \sqrt{\mathrm{rank}_A \cdot \mathrm{rank}_B}$,
-ranging from 0 (orthogonal) to 1 (identical).
-
-\textbf{Projection test.}
-Project out the $\pi$ subspace from activations, then re-run $\eta_k$
-regression.
-A large $R^2$ drop implies H1; near-zero drop implies H2.
+Given two subspaces with orthonormal bases $Q_A \in \mathbb{R}^{k_A \times d}$ and
+$Q_B \in \mathbb{R}^{k_B \times d}$ (orthonormal rows), the overlap is
+\[
+  \mathrm{overlap}(Q_A, Q_B) = \frac{\|Q_A Q_B^\top\|_F}{\sqrt{k_A \cdot k_B}}.
+\]
+The $(i,j)$ entry of $Q_A Q_B^\top$ is the cosine $\cos\theta_{ij}$ between the
+$i$-th basis vector of $Q_A$ and the $j$-th basis vector of $Q_B$; the Frobenius
+norm sums their squares, and dividing by $\sqrt{k_A k_B}$ normalises to $[0, 1]$
+(0 = orthogonal subspaces, 1 = identical subspaces).
 
 \textbf{PCA and CEV dimensionality.}
 PCA on flattened $(N \times L, d_\mathrm{model})$ activations per layer.
@@ -528,44 +529,22 @@ $\eta_C$  & 0.176 & 0.534 & 0.590 & 1.000 \\
 \bottomrule
 \end{tabular}
 \caption{Subspace overlap matrix ($0=$ orthogonal, $1=$ identical).
-$\pi$ is nearly orthogonal to all $\eta_k$ (prediction P4 confirmed).
+$\pi$ is nearly orthogonal to all $\eta_k$ subspaces (0.17--0.19).
 The $\eta_k$ subspaces overlap each other moderately, reflecting the shared
 token alphabet.}
 \label{tab:overlap}
 \end{table}
 
-$\pi$ is nearly orthogonal to all $\eta_k$ subspaces (overlap 0.17--0.19),
-confirming prediction P4.
+$\pi$ is nearly orthogonal to all $\eta_k$ subspaces (overlap 0.17--0.19).
 The moderate $\eta_k$--$\eta_{k'}$ overlap (0.53--0.69) reflects the shared
 3-token alphabet: all components respond to the same tokens, inducing partially
 shared within-component directions.
 
-\textbf{Projection tests.}
-Removing the $\pi$ subspace from activations and re-running $\eta_k$
-regression yields $R^2$ drops of less than 0.001 in all cases
-(Table~\ref{tab:proj}), strongly confirming H2 over H1 (prediction P5).
-Conversely, removing any $\eta_k$ subspace does not degrade $\pi$ regression
-(drops $< 0.001$).
-
-\begin{table}[h]
-\centering
-\begin{tabular}{lccc}
-\toprule
-Test & $R^2$ before & $R^2$ after & Drop \\
-\midrule
-Remove $\pi$, check $\eta_A$ & 0.950 & 0.950 & $< 0.001$ \\
-Remove $\pi$, check $\eta_B$ & 0.964 & 0.963 & $< 0.001$ \\
-Remove $\pi$, check $\eta_C$ & 0.985 & 0.985 & $< 0.001$ \\
-Remove $\eta_A$, check $\pi$ & 0.956 & 0.956 & $< 0.001$ \\
-Remove $\eta_B$, check $\pi$ & 0.956 & 0.956 & $< 0.001$ \\
-Remove $\eta_C$, check $\pi$ & 0.956 & 0.956 & $< 0.001$ \\
-\bottomrule
-\end{tabular}
-\caption{Projection tests: removing one subspace and re-measuring another's
-$R^2$. All drops are negligible ($< 0.001$), confirming factored
-(H2) rather than joint (H1) encoding.}
-\label{tab:proj}
-\end{table}
+As a direct functional test, removing the $\pi$ subspace from activations and
+re-running $\eta_k$ regression yields $R^2$ drops of less than 0.001 in all cases,
+and removing any $\eta_k$ subspace leaves $\pi$ regression unchanged---confirming
+that the subspaces are functionally independent, not merely geometrically
+near-orthogonal.
 
 \subsection{Fractal Geometry}
 
