@@ -376,7 +376,8 @@ revealing a low-dimensional dominant subspace atop a long noise tail.}
 Table~\ref{tab:pca} reveals a striking compression: the transformer uses fewer dimensions
 than the theoretical belief space requires.
 Theory predicts 8 dimensions (four 2D subspaces), yet 98\% of variance is
-captured in just 7 dimensions at the final layer, and 95\% in only 5.
+captured in just 7 dimensions at the final layer, and 95\% in only 5
+(Figure~\ref{fig:pca}).
 
 \begin{figure}[h]
 \centering
@@ -388,8 +389,6 @@ more compressed than the theoretical minimum, consistent with fractal sparsity
 and superposition.}
 \label{fig:pca}
 \end{figure}
-  
-Figure~\ref{fig:pca} plots this.
 One possible explanation is that the Mess3 dynamics only visit a sparse subset of
 the belief simplex: rather than covering the full triangle of possible belief states,
 trajectories trace the MSP attractor, a self-similar curve that occupies fewer than
