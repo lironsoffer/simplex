@@ -35,12 +35,13 @@ identifying which component is active (meta-belief $\pi$) and tracking
 within-component state ($\eta_k$).
 We pre-register the prediction that residual stream activations encode these in
 orthogonal subspaces (H2: the hypothesis that $\pi$ and each $\eta_k$ are encoded in mutually orthogonal residual stream subspaces).
-Analysis confirms H2 for the $\pi$--$\eta$ split---removing the $\pi$ subspace
-causes $<$0.001 drop in $\eta_k$ regression $R^2$---but not for the
+Analysis confirms H2 for the $\pi$--$\eta$ split (removing the $\pi$ subspace
+causes $<$0.001 drop in $\eta_k$ regression $R^2$), but not for the
 $\eta_k$--$\eta_{k'}$ structure (overlap 0.53--0.69), consistent with superposition.
-We provide a direct experimental test of the synchronisation horizon $N^*$
-(Riechers et al., 2025): $R^2(\pi)$ shows a phase transition near position
-$N^* \approx 9.6$ in the residual stream.
+$R^2(\pi)$ rises sharply to near 1.0 by position~2, well before the
+synchronisation horizon $N^* \approx 9.6$ (Riechers et al., 2025):
+high linear decodability requires only systematic covariation with component
+identity across sequences, not full convergence of $\pi$ to a vertex.
 Training dynamics reveal $\eta_k$ representations emerge before $\pi$
 (step~100 vs.\ 2{,}000).
 A dimension sweep shows the model prioritises $\eta_k$ over $\pi$ under capacity
@@ -60,7 +61,7 @@ domain or style and never switches mid-document.
 A model trained on such data must solve two epistemically distinct tasks:
 identify \emph{which} type of document it is reading (meta-belief $\pi$),
 and track fine-grained structure within that type (within-component belief $\eta_k$).
-We formalise this with a non-ergodic mixture of $K=3$ Mess3 HMMs---a clean,
+We formalise this with a non-ergodic mixture of $K=3$ Mess3 HMMs, a clean,
 analytically tractable proxy where ground-truth belief states are computable
 exactly.
 
@@ -72,7 +73,7 @@ The experimental design is grounded in three prior results:
   \item Riechers et al.~\cite{riechers2025} prove that non-ergodic pretraining
         necessarily produces ICL, governed by a synchronisation horizon $N^*$.
   \item Shai et al.~\cite{shai2025factored} show that parallel factors are
-        encoded in orthogonal subspaces---a result for simultaneous streams,
+        encoded in orthogonal subspaces, a result for simultaneous streams,
         not temporal mixtures.
 \end{itemize}
 This experiment combines the non-ergodic setup of Riechers et al.\ with the
@@ -128,7 +129,7 @@ Parameters were chosen so that: (a) components are distinguishable within 16
 tokens ($N^* \approx 9.6 < 16$), and (b) each component produces a distinct
 fractal geometry in belief space.
 Figure~\ref{fig:msp_fractals} shows the Mixed State Presentation (MSP) attractor
-for each component---the fractal attractor of the belief state iterated function
+for each component: the fractal attractor of the belief state iterated function
 system (IFS).
 
 \begin{figure}[h]
@@ -150,7 +151,7 @@ generated from component $k$ alone, starting from the stationary distribution.
 The context window was set to $L=16$ to satisfy $N^* < L$: with
 $N^* \approx 9.6$, the model accumulates enough context to synchronise to the
 correct component within a single sequence.
-The corpus is \emph{non-ergodic} because sequences never switch components ---
+The corpus is \emph{non-ergodic} because sequences never switch components;
 each sequence is a pure draw from one Mess3 process.
 Figure~\ref{fig:seq_example} shows one example sequence per component; the
 visual contrast in token diversity across rows reflects the very different
@@ -194,8 +195,8 @@ The three fractals are disconnected, reflecting the non-ergodic block structure.
 \caption{Joint 9-state belief geometry.
 The centre shows the meta-belief $\pi$ simplex (which component?);
 each vertex hosts the MSP fractal attractor of that component (where within?).
-The three fractals are disconnected---no probability mass flows between
-components---reflecting the non-ergodic block structure of the corpus.}
+The three fractals are disconnected (no probability mass flows between
+components), reflecting the non-ergodic block structure of the corpus.}
 \label{fig:joint}
 \end{figure}
 
@@ -244,10 +245,10 @@ of that simplex hosting the MSP fractal attractor of the corresponding
 component.
 
 We favour H2 (Factored) by analogy to Shai et al.~\cite{shai2025factored},
-where the setting is a \emph{parallel} joint process---at each timestep
+where the setting is a \emph{parallel} joint process: at each timestep
 independent subprocesses each emit a token and the observation is their
 concatenation.
-Our setup is \emph{sequential}---each sequence comes from one subprocess---but
+Our setup is \emph{sequential} (each sequence comes from one subprocess), but
 the underlying math is the same: block-diagonal transition matrices,
 conditionally independent factors, and a belief space that decomposes into
 orthogonal subspaces.
@@ -318,7 +319,7 @@ matrix.
 The principal components are ordered by variance explained.
 The \textbf{CEV (cumulative explained variance) dimensionality} at threshold $p$ is
 the smallest $d$ such that the top-$d$ components together explain $\geq p\%$ of
-total variance---the minimum number of directions needed to capture $p\%$ of the
+total variance: the minimum number of directions needed to capture $p\%$ of the
 structure in the activations.
 
 \textbf{Regression-based subspace identification}~\cite{shai2024belief}.
@@ -384,14 +385,14 @@ revealing a low-dimensional dominant subspace atop a long noise tail.}
 Table~\ref{tab:pca} reveals a striking compression: the transformer uses fewer dimensions
 than the theoretical belief space requires.
 Theory predicts 8 dimensions (four 2D subspaces), yet 98\% of variance is
-captured in just 7 dimensions at the final layer---and 95\% in only 5.
+captured in just 7 dimensions at the final layer, and 95\% in only 5.
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.85\textwidth]{../figures/pca_explained_variance.png}
 \caption{Cumulative explained variance (CEV) by context position, for Layer~0 (dashed)
 and Layer~1 (solid). The predicted 8 dimensions under H2 are marked by the
-dotted vertical line. Layer~1 explains 95\% of variance in just 5 components ---
+dotted vertical line. Layer~1 explains 95\% of variance in just 5 components,
 more compressed than the theoretical minimum, consistent with fractal sparsity
 and superposition.}
 \label{fig:pca}
@@ -412,7 +413,7 @@ We offer three possible explanations, though we cannot confirm which dominates:
         2D subspace, so PCA sees less than 2 effective dimensions per factor.
   \item \textbf{Superposition enabled by attractor sparsity.}
         Because the attractors are sparse, the transformer can pack multiple
-        belief directions into shared dimensions without interference---achieving
+        belief directions into shared dimensions without interference, achieving
         near-perfect $R^2 > 0.95$ with fewer dimensions than a uniform
         distribution would require.
 \end{enumerate}
@@ -444,21 +445,27 @@ All belief targets are linearly decodable with $R^2 > 0.95$~\cite{li2023othello}
 confirming that the residual stream encodes the full joint belief state.
 
 Figure~\ref{fig:r2_pos} shows $R^2$ as a function of context position.
-$R^2(\eta_k)$ is high from the very first position in both layers---the
-within-component belief is encoded reliably regardless of how much context
-has accumulated.
-$R^2(\pi)$ tells a different story: Layer~1 maintains a stable $\pi$
-representation that accumulates over the full context.
+$R^2(\eta_k)$ is near 1.0 from position~1, confirming that within-component
+belief is encoded reliably from the very first token.
+$R^2(\pi)$ starts at 0 (no context at position~1) and rises sharply to
+near 1.0 by position~2, remaining stable thereafter.
 The aggregate $R^2(\pi) = 0.956$ in Table~\ref{tab:r2} reflects this
 stability averaged over all positions.
+
+This early rise indicates the model has learned the emission statistics of
+each component during training.
+The first token is already highly diagnostic: token~0 is emitted with
+probability $\alpha_A = 0.95$ under component~A but only $\approx 0.3$ under
+component~C, so the Bayesian posterior over components shifts substantially
+after a single observation.
+The model encodes this partial posterior accurately and immediately.
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.85\textwidth]{../figures/r2_vs_position.png}
 \caption{$R^2$ vs.\ context position for Layer~1.
-$R^2(\eta_k)$ (coloured) is high from position~1.
-$R^2(\pi)$ (black) rises and stabilises around $N^* \approx 9.6$ (red dashed line),
-confirming that meta-belief solidifies at the synchronisation horizon.}
+$R^2(\eta_k)$ (coloured) is near 1.0 from position~1.
+$R^2(\pi)$ (black) starts at 0 and rises sharply to near 1.0 by position~2.}
 \label{fig:r2_pos}
 \end{figure}
 
@@ -490,7 +497,7 @@ shared within-component directions, consistent with superposition~\cite{elhage20
 
 As a direct functional test, removing the $\pi$ subspace from activations and
 re-running $\eta_k$ regression yields $R^2$ drops of less than 0.001 in all cases,
-and removing any $\eta_k$ subspace leaves $\pi$ regression unchanged---confirming
+and removing any $\eta_k$ subspace leaves $\pi$ regression unchanged, confirming
 that the subspaces are functionally independent, not merely geometrically
 near-orthogonal.
 
@@ -507,9 +514,9 @@ structure of the belief distribution, not merely its mean.
 Component~A exhibits a rich self-similar fractal; component~B a moderately
 nested fractal; component~C a sparse set of $\sim$9 discrete clusters.
 
-\begin{figure}[h]
+\begin{figure}[h!]
 \centering
-\includegraphics[width=\textwidth]{../figures/fractal_comparison.png}
+\includegraphics[width=0.72\textwidth]{../figures/fractal_comparison.png}
 \caption{Fractal comparison for each component: ground-truth $\eta_k$
 trajectories (left) vs.\ regression-predicted $\eta_k$ from residual stream
 activations (right), plotted in barycentric simplex coordinates.
@@ -534,7 +541,7 @@ cross-component comparison~\cite{saxe2019semantic}.}
 Figure~\ref{fig:dynamics} shows that $\eta_k$
 subspaces emerge \emph{before} the $\pi$ subspace.
 
-The ordering---within-component beliefs first, meta-belief later---suggests
+The ordering (within-component beliefs first, meta-belief later) suggests
 that the transformer first learns to track the local token statistics of each
 component individually (which requires only learning the Mess3 update within
 each component's context), and only subsequently learns to \emph{distinguish}
@@ -545,70 +552,69 @@ while improving $\pi$ only helps once the model has already learned the
 within-component structure to compare.
 
 % ──────────────────────────────────────────────────────────────────────────────
-\section{Additional Analysis: Vary-One}
-\label{sec:vary_one}
-% ──────────────────────────────────────────────────────────────────────────────
-
-\textbf{Motivation.}
-The vary-one analysis tests whether the learned $\eta_k$ subspaces are
-\emph{component-specific}.
-Under H2, each $\eta_k$ should live in its own 2D subspace.
-Fitting the $\eta_k$ regression on only component-$k$ sequences (fixing
-component identity, varying within-component positions) reveals whether the
-model has learned three distinct fractal geometries or one shared one.
-If the cross-component subspace overlap is low, each component occupies a
-distinct region of residual stream space.
-
-\textbf{Results.}
-
-\begin{table}[h]
-\centering
-\begin{tabular}{lc}
-\toprule
-Component & Within-component $\eta_k$ $R^2$ \\
-\midrule
-A & 0.990 \\
-B & 0.962 \\
-C & 0.980 \\
-\bottomrule
-\end{tabular}
-\caption{Vary-one $R^2$: regression fit using only sequences from component
-$k$.}
-\label{tab:vary_one}
-\end{table}
-
-Within-component $R^2$ is high for all components ($\geq 0.96$,
-Table~\ref{tab:vary_one}), confirming that sequences from the same component
-share a coherent subspace structure.
-For component~A the single-component fit is notably better (0.990 vs.\ 0.950),
-while for B and C the difference is small, likely because their more uniform
-attractors are already well-characterised by the global fit.
-
-\begin{table}[h]
-\centering
-\begin{tabular}{lccc}
-\toprule
- & A & B & C \\
-\midrule
-A & 1.000 & 0.275 & 0.208 \\
-B & 0.275 & 1.000 & 0.510 \\
-C & 0.208 & 0.510 & 1.000 \\
-\bottomrule
-\end{tabular}
-\caption{Cross-component subspace overlap from vary-one analysis.
-A and C are nearly orthogonal ($0.208$); A--B and B--C show moderate overlap,
-likely due to similar emission statistics.}
-\label{tab:vary_cross}
-\end{table}
-
-The cross-component overlaps (Table~\ref{tab:vary_cross}) are substantially
-lower than the $\eta_k$--$\eta_{k'}$ overlaps in the global analysis
-(Table~\ref{tab:overlap}), especially for A--C (0.208).
-This confirms that the transformer has learned \emph{component-specific}
-fractal geometries.
-Component B's moderate overlap with both A and C likely reflects its
-intermediate emission strength ($\alpha = 0.80$), making its belief geometry
-somewhat ``between'' those of A and C.
+%\section{Additional Analysis: Vary-One}
+%\label{sec:vary_one}
+%
+%\textbf{Motivation.}
+%The vary-one analysis tests whether the learned $\eta_k$ subspaces are
+%\emph{component-specific}.
+%Under H2, each $\eta_k$ should live in its own 2D subspace.
+%Fitting the $\eta_k$ regression on only component-$k$ sequences (fixing
+%component identity, varying within-component positions) reveals whether the
+%model has learned three distinct fractal geometries or one shared one.
+%If the cross-component subspace overlap is low, each component occupies a
+%distinct region of residual stream space.
+%
+%\textbf{Results.}
+%
+%\begin{table}[h]
+%\centering
+%\begin{tabular}{lc}
+%\toprule
+%Component & Within-component $\eta_k$ $R^2$ \\
+%\midrule
+%A & 0.990 \\
+%B & 0.962 \\
+%C & 0.980 \\
+%\bottomrule
+%\end{tabular}
+%\caption{Vary-one $R^2$: regression fit using only sequences from component
+%$k$.}
+%\label{tab:vary_one}
+%\end{table}
+%
+%Within-component $R^2$ is high for all components ($\geq 0.96$,
+%Table~\ref{tab:vary_one}), confirming that sequences from the same component
+%share a coherent subspace structure.
+%For component~A the single-component fit is notably better (0.990 vs.\ 0.950),
+%while for B and C the difference is small, likely because their more uniform
+%attractors are already well-characterised by the global fit.
+%
+%\begin{table}[h]
+%\centering
+%\begin{tabular}{lccc}
+%\toprule
+% & A & B & C \\
+%\midrule
+%A & 1.000 & 0.275 & 0.208 \\
+%B & 0.275 & 1.000 & 0.510 \\
+%C & 0.208 & 0.510 & 1.000 \\
+%\bottomrule
+%\end{tabular}
+%\caption{Cross-component subspace overlap from vary-one analysis.
+%A and C are nearly orthogonal ($0.208$); A--B and B--C show moderate overlap,
+%likely due to similar emission statistics.}
+%\label{tab:vary_cross}
+%\end{table}
+%
+%The cross-component overlaps (Table~\ref{tab:vary_cross}) are substantially
+%lower than the $\eta_k$--$\eta_{k'}$ overlaps in the global analysis
+%(Table~\ref{tab:overlap}), especially for A--C (0.208).
+%This confirms that the transformer has learned \emph{component-specific}
+%fractal geometries.
+%Component B's moderate overlap with both A and C likely reflects its
+%intermediate emission strength ($\alpha = 0.80$), making its belief geometry
+%somewhat ``between'' those of A and C.
 
 % ──────────────────────────────────────────────────────────────────────────────
 \section{Additional Analysis: Dimension Sweep}
@@ -627,7 +633,7 @@ represent both.
 The factored representation result of Shai et al.~\cite{shai2025factored} says
 $\pi$ and $\eta_k$ are equally important in the sense of conditional independence,
 but they are not equally important for the \emph{next-token prediction task}.
-Knowing $\pi$ alone does not determine the next-token distribution---one also needs
+Knowing $\pi$ alone does not determine the next-token distribution; one also needs
 $\eta_k$ for the active component.
 Conversely, $\eta_k$ (plus implicit knowledge of which component is active from
 context) is sufficient.
@@ -692,7 +698,7 @@ Figure~\ref{fig:r2_vs_dim} and Table~\ref{tab:dim_r2} tell a clear story.
 $\eta_k$ encoding saturates early: $R^2(\eta_k) \geq 0.80$ already at $d=4$,
 and improves only marginally thereafter.
 By contrast, $R^2(\pi)$ starts near zero and grows slowly, reaching only 0.69
-at $d=8$---the theoretical minimum for a full factored representation---and
+at $d=8$ (the theoretical minimum for a full factored representation), and
 0.957 only at $d=64$.
 
 \begin{figure}[h]
@@ -708,7 +714,7 @@ representation.}
 
 The scatter plots in Figure~\ref{fig:scatter_d4_d6} confirm this geometrically.
 At $d=4$, PC projections coloured by component identity (left) show a single
-indistinguishable blob---the model has essentially zero $\pi$ encoding---while
+indistinguishable blob (the model has essentially zero $\pi$ encoding), while
 the same projections coloured by dominant within-component state (right) form
 clean diagonal bands.
 At $d=6$, the first signs of component separation appear, but the $\eta_k$ dip
@@ -744,7 +750,7 @@ The result confirms the prediction: $\eta_k$ is prioritised over $\pi$ under
 capacity pressure.
 The explanation is information-theoretic.
 The residual stream should encode what the context does not already make obvious.
-$\pi$ collapses after $N^* \approx 9.6$ tokens---the context sequence implicitly
+$\pi$ collapses after $N^* \approx 9.6$ tokens; the context sequence implicitly
 carries the component identity after that point.
 $\eta_k$, by contrast, requires ongoing Bayesian integration and never becomes
 obvious from the raw tokens; it must be maintained explicitly in the residual
@@ -785,7 +791,7 @@ within-component beliefs into a shared, partially overlapping region of
 residual stream space.
 The vary-one analysis shows that component-specific fits are more distinct
 (A--C overlap 0.208) than the global fits suggest, so the components are not
-fully merged---but they are far from orthogonal.
+fully merged, but they are far from orthogonal.
 
 The pre-registered prediction (CEV dimensionality $\approx 8$) was not confirmed:
 both layers use only 5--6 dimensions to explain 95\% of variance, consistent with
@@ -804,12 +810,12 @@ This suggests the model first learns to track per-component token statistics
 The transformer cleanly separates ``what component am I in?'' ($\pi$) from
 ``where within this component am I?'' ($\eta$) without explicit supervision.
 However, the three within-component beliefs are not further separated from each
-other---they share residual stream directions, suggesting that factoring happens
+other; they share residual stream directions, suggesting that factoring happens
 at the coarsest level of the hierarchy (meta vs.\ within) but not below it.
 
 \textbf{Two-level belief structure maps onto two-phase training dynamics.}
 Within-component geometry is learned first and meta-belief routing emerges
-second---the ordering reflects loss reduction efficiency, not conceptual
+second; the ordering reflects loss reduction efficiency, not conceptual
 priority.
 
 \textbf{In-context learning has geometric structure.}
@@ -839,8 +845,12 @@ hierarchically factored residual stream geometry: meta-belief $\pi$ is encoded
 in a subspace nearly orthogonal to all within-component beliefs $\eta_k$, while
 the $\eta_k$ subspaces are partially entangled due to their shared geometric
 structure on the 2-simplex.
-The synchronisation horizon $N^*$ predicted by Riechers et al.~\cite{riechers2025}
-manifests as a phase transition in $R^2(\pi)$ at the predicted context position.
+$R^2(\pi)$ rises sharply by position~2, earlier than the synchronisation
+horizon $N^* \approx 9.6$ predicted by Riechers et al.~\cite{riechers2025}:
+linear decodability requires only systematic covariation with component
+identity, which the first highly-diagnostic token already provides, while
+full synchronisation (commitment to one vertex) still requires $\approx N^*$
+tokens.
 Training dynamics show $\eta_k$ representations emerge an order of magnitude earlier than $\pi$ (step~100 vs.\ 2{,}000), reflecting loss-gradient priority.
 A dimension sweep confirms this hierarchy persists under capacity pressure: the model sacrifices $\pi$ encoding before $\eta_k$ encoding.
 Future work should test whether these geometric signatures generalise to larger
