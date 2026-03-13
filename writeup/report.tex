@@ -411,13 +411,6 @@ iterating the IFS $f_a(\eta) = \eta T^{(a)} / (\eta T^{(a)}\mathbf{1})$ for
 \label{sec:results}
 % ──────────────────────────────────────────────────────────────────────────────
 
-\subsection{Training Loss}
-
-The model converges to a stable validation loss. Per-position loss decreases
-monotonically with context length, confirming the model uses accumulated
-context. We observe the sharpest drop around positions 9--10, consistent with
-the synchronisation horizon $N^* \approx 9.6$.
-
 \subsection{PCA Dimensionality}
 
 \begin{table}[h]
@@ -441,9 +434,17 @@ than the theoretical belief space requires.
 Theory predicts 8 dimensions (four 2D subspaces), yet 98\% of variance is
 captured in just 7 dimensions at the final layer---and 95\% in only 5.
 
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.85\textwidth]{../figures/pca_explained_variance.png}
+  \caption{Cumulative explained variance by layer. Layer 1 (final) uses 5
+  components to explain 95\% of variance.}
+  \label{fig:pca}
+  \end{figure}
+  
 This suggests the transformer is \emph{more efficient} than the theoretical
 minimum representation.
-Three factors contribute:
+We offer three possible explanations, though we cannot confirm which dominates:
 \begin{enumerate}[noitemsep]
   \item \textbf{Component C's near-degenerate attractor.}
         With $\alpha=0.55$, component C has only $\sim$9 reachable belief
@@ -462,15 +463,7 @@ Three factors contribute:
 At 100\% CEV both layers require all 64 dimensions,
 confirming a sharp transition between the dominant low-dimensional belief
 subspace and a long tail of noise dimensions.
-See Figure~\ref{fig:pca}.
 
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.85\textwidth]{../figures/pca_explained_variance.png}
-\caption{Cumulative explained variance by layer. Layer 1 (final) uses 5
-components to explain 95\% of variance.}
-\label{fig:pca}
-\end{figure}
 
 \subsection{Linear Decodability}
 
