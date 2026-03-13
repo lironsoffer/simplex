@@ -34,15 +34,12 @@ This construction requires the model to solve two epistemically distinct tasks:
 identifying which component is active (meta-belief $\pi$) and tracking
 within-component state ($\eta_k$).
 We predict that residual stream activations encode these in orthogonal subspaces (H2).
-Analysis confirms H2 for the $\pi$--$\eta$ split (removing the $\pi$ subspace
-causes $<$0.001 drop in $\eta_k$ regression $R^2$), but not for the
-$\eta_k$--$\eta_{k'}$ structure (overlap 0.53--0.69), consistent with superposition.
-$R^2(\pi)$ rises sharply to near 1.0 by position~2, well before the
-synchronisation horizon $N^* \approx 9.6$ (Riechers et al., 2025).
-Training dynamics reveal $\eta_k$ representations emerge before $\pi$
-(step~100 vs.\ 2{,}000), and a capacity pressure analysis confirms that
-$\eta_k$ is prioritised over $\pi$ when dimensions are scarce, with the
-$\pi$--$\eta_k$ separation preserved even under strong capacity constraints.
+Analysis confirms H2 for the $\pi$--$\eta$ split but not for the
+$\eta_k$--$\eta_{k'}$ structure, consistent with superposition.
+Training dynamics reveal $\eta_k$ representations emerge before $\pi$,
+and a capacity pressure analysis confirms that $\eta_k$ is prioritised over $\pi$
+when dimensions are scarce, with the $\pi$--$\eta_k$ separation preserved even
+under strong capacity constraints.
 \end{abstract}
 
 \tableofcontents
@@ -74,12 +71,9 @@ The experimental design is grounded in three prior results:
         not temporal mixtures.
 \end{itemize}
 This experiment combines the non-ergodic setup of Riechers et al.\ with the
-geometry analysis of Shai et al.\ to ask: \emph{non-ergodic mixture $\to$
-factored geometry?}
-It also provides a geometric complement to Riechers et al.: their
-synchronisation horizon $N^*$ predicts \emph{when} the model commits to one
-component; we ask \emph{where} in the residual stream that commitment
-is encoded.
+geometry analysis of Shai et al.\ to ask whether training on a non-ergodic mixture
+induces a factored residual stream geometry, with $\pi$ and $\eta_k$ encoded in
+orthogonal subspaces.
 
 % ──────────────────────────────────────────────────────────────────────────────
 \section{Setup}
