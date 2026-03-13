@@ -117,9 +117,8 @@ $x$ is the off-diagonal transition probability.}
 \label{tab:components}
 \end{table}
 
-Parameters were chosen so that: (a) components are distinguishable within 16
-tokens ($N^* \approx 9.6 < 16$), and (b) each component produces a distinct
-fractal geometry in belief space.
+Parameters were chosen so that each component produces a distinct fractal geometry
+in belief space.
 Figure~\ref{fig:msp_fractals} shows the Mixed State Presentation (MSP) attractor
 for each component: the fractal attractor of the belief state iterated function
 system (IFS).
@@ -140,9 +139,9 @@ These three geometries define the expected residual stream structure under H2.}
 $k \sim \mathrm{Uniform}(\{A, B, C\})$ is sampled for each sequence.
 A token sequence $x_{1:L}$ of length $L=16$ (the context window) is then
 generated from component $k$ alone, starting from the stationary distribution.
-The context window was set to $L=16$ to satisfy $N^* < L$: with
-$N^* \approx 9.6$, the model accumulates enough context to synchronise to the
-correct component within a single sequence.
+The context window was set to $L=16$ to satisfy $N^* < L$ (Section~\ref{sec:math}),
+ensuring the model accumulates enough context to synchronise to the correct
+component within a single sequence ($N^* \approx 9.6$).
 The corpus is \emph{non-ergodic} because sequences never switch components;
 each sequence is a pure draw from one Mess3 process.
 Figure~\ref{fig:seq_example} shows one example sequence per component; the
