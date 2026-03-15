@@ -202,7 +202,7 @@ parameters.
 
 Cross-entropy next-token prediction, AdamW ($\mathrm{lr}=10^{-3}$, cosine
 decay to $10^{-5}$, 1{,}000 warmup steps), 50{,}000 steps total.
-Batch size 64 (3{,}200{,}000 total sequence exposures over 50{,}000 steps).
+Batch size 256.
 Sequences are generated on-the-fly each step to prevent overfitting.
 Checkpoints saved at steps 100, 500, 1{,}000, 2{,}000, then every 5{,}000
 steps; at each checkpoint we run regression at the final layer and final
@@ -248,6 +248,22 @@ them to do so here too.
 We therefore pre-register H2: $\pi$ and each $\eta_k$ are encoded in mutually
 orthogonal residual stream subspaces, with CEV dimensionality $\approx 8$
 (four 2D subspaces: one for $\pi$, one each for $\eta_A$, $\eta_B$, $\eta_C$).
+
+\textbf{Predicted context-position dynamics.}
+$R^2(\eta_k)$ should be high from the first token, since within-component belief
+updates begin immediately.
+$R^2(\pi)$ should start near zero (no information to distinguish components) and
+rise toward~1 around the synchronisation horizon $N^* \approx 10$, once enough
+tokens have been observed to distinguish components' emission statistics.
+Before $N^*$, the meta-belief is uncertain and contributes little predictable
+structure; after $N^*$, it collapses near a simplex vertex.
+
+\textbf{Predicted layer dynamics.}
+Layer~0 should encode a rough, partially mixed representation (both $\pi$ and
+$\eta_k$ present but not cleanly separated).
+Layer~1 should refine this: higher $R^2$ across all targets, with crisper
+subspace separation as the second layer's MLP and attention have the opportunity
+to orthogonalise the representation.
 
 \subsection{Mathematical Derivation}
 \label{sec:math}
@@ -452,8 +468,42 @@ The model encodes this partial posterior accurately and immediately.
 \includegraphics[width=0.6\textwidth]{../figures/r2_vs_position.png}
 \caption{$R^2$ vs.\ context position for Layer~1.
 $R^2(\eta_k)$ (coloured) is near 1.0 from position~1.
-$R^2(\pi)$ (black) starts at 0 and rises sharply to near 1.0 by position~2.}
+$R^2(\pi)$ (black) starts at 0 and rises sharply to near 1.0 by position~2,
+then declines gradually to 0.96 at the final position.}
 \label{fig:r2_pos}
+\end{figure}
+
+\textbf{Layer comparison.}
+Figure~\ref{fig:r2_heatmaps} shows $R^2$ heatmaps across both layers and all
+positions.
+At Layer~0, $R^2(\pi)$ rises sharply at early positions but then \emph{declines}
+substantially---from near~1.0 at position~2 to $\approx 0.53$ at position~14---before
+partially recovering at the final position.
+At Layer~1, $R^2(\pi)$ follows the same early rise but remains high throughout
+($> 0.95$), declining only gently to 0.96 at the final position.
+This suggests Layer~0 encodes a raw, position-entangled representation of $\pi$
+that degrades as context accumulates and the representation becomes
+increasingly nonlinear; Layer~1 refines this into a stable, linearly decodable
+encoding.
+The $\eta_k$ encoding is uniformly high at both layers ($R^2 > 0.99$ at all
+positions except the final), confirming that within-component belief is
+robustly encoded throughout.
+
+The gradual decline in $R^2(\pi)$ at the final position (0.96 at Layer~1
+vs.\ near 1.0 at early positions) is noteworthy.
+One explanation is that the model's final-position representations are
+optimised for next-token prediction, which requires integrating $\pi$ with
+$\eta_k$ in a way that may not be purely linear in the belief coordinates.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\textwidth]{../figures/r2_heatmaps.png}
+\caption{$R^2$ heatmaps for $\pi$ and $\eta_k$ across layers (rows) and
+context positions (columns).
+Layer~0 shows strong $\pi$ encoding at early positions that degrades with
+context length; Layer~1 maintains high $R^2$ throughout.
+$\eta_k$ is uniformly high at both layers.}
+\label{fig:r2_heatmaps}
 \end{figure}
 
 \subsection{Subspace Orthogonality}
@@ -523,90 +573,93 @@ The regression output reproduces the MSP fractal geometry.}
 \includegraphics[width=0.6\textwidth]{../figures/training_dynamics.png}
 \caption{$R^2$ of $\pi$ and $\eta_k$ regressions over training steps
 (final layer, final position). $\eta_k$ representations emerge early
-(step~100, $R^2 > 0.9$); $\pi$ representation emerges later (step~2{,}000).
-The ordering reflects loss-gradient efficiency: per-component prediction
-reduces loss immediately, while distinguishing components requires
-cross-component comparison.}
+(step~100, $R^2 > 0.91$). $\pi$ is already partially encoded at step~100
+($R^2 = 0.65$) but saturates more slowly, reaching 0.92 by step~2{,}000 and
+continuing to improve gradually to 0.96 by step~50{,}000.}
 \label{fig:dynamics}
 \end{figure}
 
 Figure~\ref{fig:dynamics} shows that $\eta_k$
-subspaces emerge \emph{before} the $\pi$ subspace.
+subspaces emerge first and are already near their final quality by step~100
+($R^2 > 0.91$), while $\pi$ starts at a lower baseline ($R^2 = 0.65$)
+and improves over a longer timescale: 0.84 at step~500, 0.92 at step~2{,}000,
+and 0.96 at step~50{,}000.
+Both representations are present from early training, but their convergence
+rates differ by roughly an order of magnitude.
 
-The ordering (within-component beliefs first, meta-belief later) suggests
-that the transformer first learns to track the local token statistics of each
-component individually (which requires only learning the Mess3 update within
-each component's context), and only subsequently learns to \emph{distinguish}
-which component is active (which requires comparing cross-component
-likelihoods).
-This ordering makes sense: per-component prediction reduces loss immediately,
-while improving $\pi$ only helps once the model has already learned the
-within-component structure to compare.
+This ordering suggests the model first learns the per-component Mess3 update
+rule (which reduces loss immediately for any sequence), and then gradually
+improves its ability to \emph{distinguish} which component is active (which
+requires comparing cross-component likelihoods and only helps once the
+within-component structure is already learned).
 
 % ──────────────────────────────────────────────────────────────────────────────
-%\section{Additional Analysis: Vary-One}
-%\label{sec:vary_one}
-%
-%\textbf{Motivation.}
-%The vary-one analysis tests whether the learned $\eta_k$ subspaces are
-%\emph{component-specific}.
-%Under H2, each $\eta_k$ should live in its own 2D subspace.
-%Fitting the $\eta_k$ regression on only component-$k$ sequences (fixing
-%component identity, varying within-component positions) reveals whether the
-%model has learned three distinct fractal geometries or one shared one.
-%If the cross-component subspace overlap is low, each component occupies a
-%distinct region of residual stream space.
-%
-%\textbf{Results.}
-%
-%\begin{table}[h]
-%\centering
-%\begin{tabular}{lc}
-%\toprule
-%Component & Within-component $\eta_k$ $R^2$ \\
-%\midrule
-%A & 0.990 \\
-%B & 0.962 \\
-%C & 0.980 \\
-%\bottomrule
-%\end{tabular}
-%\caption{Vary-one $R^2$: regression fit using only sequences from component
-%$k$.}
-%\label{tab:vary_one}
-%\end{table}
-%
-%Within-component $R^2$ is high for all components ($\geq 0.96$,
-%Table~\ref{tab:vary_one}), confirming that sequences from the same component
-%share a coherent subspace structure.
-%For component~A the single-component fit is notably better (0.990 vs.\ 0.950),
-%while for B and C the difference is small, likely because their more uniform
-%attractors are already well-characterised by the global fit.
-%
-%\begin{table}[h]
-%\centering
-%\begin{tabular}{lccc}
-%\toprule
-% & A & B & C \\
-%\midrule
-%A & 1.000 & 0.275 & 0.208 \\
-%B & 0.275 & 1.000 & 0.510 \\
-%C & 0.208 & 0.510 & 1.000 \\
-%\bottomrule
-%\end{tabular}
-%\caption{Cross-component subspace overlap from vary-one analysis.
-%A and C are nearly orthogonal ($0.208$); A--B and B--C show moderate overlap,
-%likely due to similar emission statistics.}
-%\label{tab:vary_cross}
-%\end{table}
-%
-%The cross-component overlaps (Table~\ref{tab:vary_cross}) are substantially
-%lower than the $\eta_k$--$\eta_{k'}$ overlaps in the global analysis
-%(Table~\ref{tab:overlap}), especially for A--C (0.208).
-%This confirms that the transformer has learned \emph{component-specific}
-%fractal geometries.
-%Component B's moderate overlap with both A and C likely reflects its
-%intermediate emission strength ($\alpha = 0.80$), making its belief geometry
-%somewhat ``between'' those of A and C.
+\subsection{Vary-One Analysis}
+\label{sec:vary_one}
+
+\textbf{Motivation.}
+The vary-one analysis tests whether the learned $\eta_k$ subspaces are
+\emph{component-specific}.
+Under H2, each $\eta_k$ should live in its own 2D subspace.
+Fitting the $\eta_k$ regression on only component-$k$ sequences (fixing
+component identity, varying within-component positions) reveals whether the
+model has learned three distinct fractal geometries or one shared one.
+If the cross-component subspace overlap is low, each component occupies a
+distinct region of residual stream space.
+
+\textbf{Results.}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lc}
+\toprule
+Component & Within-component $\eta_k$ $R^2$ \\
+\midrule
+A & 0.990 \\
+B & 0.962 \\
+C & 0.980 \\
+\bottomrule
+\end{tabular}
+\caption{Vary-one $R^2$: regression fit using only sequences from component
+$k$.}
+\label{tab:vary_one}
+\end{table}
+
+Within-component $R^2$ is high for all components ($\geq 0.96$,
+Table~\ref{tab:vary_one}), confirming that sequences from the same component
+share a coherent subspace structure.
+For component~A the single-component fit is notably better (0.990 vs.\ 0.950),
+while for B and C the difference is small, likely because their more uniform
+attractors are already well-characterised by the global fit.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lccc}
+\toprule
+ & A & B & C \\
+\midrule
+A & 1.000 & 0.275 & 0.208 \\
+B & 0.275 & 1.000 & 0.510 \\
+C & 0.208 & 0.510 & 1.000 \\
+\bottomrule
+\end{tabular}
+\caption{Cross-component subspace overlap from vary-one analysis.
+A and C are nearly orthogonal ($0.208$); A--B and B--C show moderate overlap,
+likely due to similar emission statistics.}
+\label{tab:vary_cross}
+\end{table}
+
+The cross-component overlaps (Table~\ref{tab:vary_cross}) are substantially
+lower than the $\eta_k$--$\eta_{k'}$ overlaps in the global analysis
+(Table~\ref{tab:overlap}), especially for A--C (0.208 vs.\ 0.534).
+This confirms that the transformer has learned \emph{component-specific}
+fractal geometries: the high $\eta_k$--$\eta_{k'}$ overlap in
+Table~\ref{tab:overlap} is inflated by the global regression mixing data
+from all components, while the vary-one analysis isolates the true
+per-component subspaces.
+Component B's moderate overlap with both A and C likely reflects its
+intermediate emission strength ($\alpha = 0.80$), making its belief geometry
+somewhat ``between'' those of A and C.
 
 % ──────────────────────────────────────────────────────────────────────────────
 \section{Belief State Priority Under Capacity Pressure}
