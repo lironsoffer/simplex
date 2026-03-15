@@ -202,7 +202,7 @@ parameters.
 
 Cross-entropy next-token prediction, AdamW ($\mathrm{lr}=10^{-3}$, cosine
 decay to $10^{-5}$, 1{,}000 warmup steps), 50{,}000 steps total.
-Batch size 64 (3{,}200{,}000 total sequence exposures over 50{,}000 steps).
+Batch size 256 (12{,}800{,}000 total sequence exposures over 50{,}000 steps).
 Sequences are generated on-the-fly each step to prevent overfitting.
 Checkpoints saved at steps 100, 500, 1{,}000, 2{,}000, then every 5{,}000
 steps; at each checkpoint we run regression at the final layer and final
@@ -826,12 +826,6 @@ N.~Elhage et al.
 \newblock Toy models of superposition.
 \newblock \emph{Transformer Circuits Thread}, 2022.
 \newblock \url{https://transformer-circuits.pub/2022/toy_model/index.html}.
-
-\bibitem{olsson2022induction}
-C.~Olsson et al.
-\newblock In-context learning and induction heads.
-\newblock \emph{Transformer Circuits Thread}, 2022.
-\newblock \url{https://transformer-circuits.pub/2022/in-context-learning-and-induction-heads/index.html}.
 
 
 \end{thebibliography}

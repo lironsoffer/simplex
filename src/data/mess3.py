@@ -248,7 +248,7 @@ class Mess3HMM:
 
 # Default component parameters
 # Chosen so that N* ≈ 10 < 16 (context window), ensuring synchronisation within a sequence.
-# Component C (α=0.55) produces a near-degenerate attractor (~5 reachable belief states),
+# Component C (α=0.55) produces a near-degenerate attractor (~9 visually distinct clusters),
 # which is mathematically correct for these parameters.
 COMPONENT_PARAMS = [
     Mess3Params(alpha=0.95, x=0.02, name="A"),  # sharp fractal, slow mixing
