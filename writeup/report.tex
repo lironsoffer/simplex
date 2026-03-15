@@ -389,6 +389,9 @@ more compressed than the theoretical minimum, consistent with fractal sparsity
 and superposition.}
 \label{fig:pca}
 \end{figure}
+
+This compression is interesting in its own right, and we flag it as an open question for future work.
+
 One possible explanation is that the Mess3 dynamics only visit a sparse subset of
 the belief simplex: rather than covering the full triangle of possible belief states,
 trajectories trace the MSP attractor, a self-similar curve that occupies fewer than
@@ -402,6 +405,9 @@ At 100\% CEV both layers require all 64 dimensions,
 confirming a sharp transition between the dominant low-dimensional belief
 subspace and a long tail of noise dimensions.
 
+An alternative to fractal sparsity is \emph{superposition}~\cite{elhage2022superposition}: the model actively packs multiple belief dimensions into shared, near-orthogonal directions, achieving compression through representational overlap.
+These two explanations are mechanistically distinct and have different implications: fractal sparsity would persist regardless of architecture or training procedure, while superposition would be sensitive to capacity constraints and regularisation.
+We do not have enough evidence to distinguish between them here; this hypothesis resurfaces in the orthogonality analysis (Section~\ref{sec:results}) and discussion (Section~\ref{sec:discussion}).
 
 \subsection{Linear Decodability}
 
@@ -422,7 +428,7 @@ $\eta_C$ (component C) & 0.984 \\
 \label{tab:r2}
 \end{table}
 
-All belief targets are linearly decodable with $R^2 > 0.95$~\cite{li2023othello},
+All belief targets are linearly decodable with $R^2 > 0.95$,
 confirming that the residual stream encodes the full joint belief state.
 
 Figure~\ref{fig:r2_pos} shows $R^2$ as a function of context position.
@@ -520,7 +526,7 @@ The regression output reproduces the MSP fractal geometry.}
 (step~100, $R^2 > 0.9$); $\pi$ representation emerges later (step~2{,}000).
 The ordering reflects loss-gradient efficiency: per-component prediction
 reduces loss immediately, while distinguishing components requires
-cross-component comparison~\cite{saxe2019semantic}.}
+cross-component comparison.}
 \label{fig:dynamics}
 \end{figure}
 
@@ -827,15 +833,6 @@ C.~Olsson et al.
 \newblock \emph{Transformer Circuits Thread}, 2022.
 \newblock \url{https://transformer-circuits.pub/2022/in-context-learning-and-induction-heads/index.html}.
 
-\bibitem{li2023othello}
-K.~Li et al.
-\newblock Emergent world representations: Exploring a sequence model trained on a synthetic task.
-\newblock In \emph{ICLR}, 2023. arXiv:2210.13382.
-
-\bibitem{saxe2019semantic}
-A.~M.~Saxe, J.~L.~McClelland, and S.~Ganguli.
-\newblock A mathematical theory of semantic development in deep neural networks.
-\newblock \emph{PNAS}, 116(23):11537--11546, 2019.
 
 \end{thebibliography}
 
